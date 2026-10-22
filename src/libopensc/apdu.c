@@ -60,7 +60,10 @@ size_t sc_apdu_get_length(const sc_apdu_t *apdu, unsigned int proto)
 		ret += apdu->lc + (proto == SC_PROTO_T0 ? 1 : 3);
 		break;
 	case SC_APDU_CASE_4_SHORT:
-		ret += apdu->lc + (proto != SC_PROTO_T0 ? 2 : 1);
+		/* a Le byte follows the data under T=1, but not under T=0, nor for a
+		 * card that rejects it (SC_APDU_FLAGS_CASE4_SHORT_NO_LE) */
+		ret += apdu->lc + ((proto != SC_PROTO_T0 &&
+			!(apdu->flags & SC_APDU_FLAGS_CASE4_SHORT_NO_LE)) ? 2 : 1);
 		break;
 	case SC_APDU_CASE_4_EXT:
 		ret += apdu->lc + (proto == SC_PROTO_T0 ? 1 : 5);
@@ -141,8 +144,10 @@ int sc_apdu2bytes(sc_context_t *ctx, const sc_apdu_t *apdu,
 		*p++ = (u8)apdu->lc;
 		memcpy(p, apdu->data, apdu->lc);
 		p += apdu->lc;
-		/* in case of T0 no Le byte is added */
-		if (proto != SC_PROTO_T0)
+		/* no Le byte under T=0, nor for a card that rejects it under T=1
+		 * (SC_APDU_FLAGS_CASE4_SHORT_NO_LE); the card answers 61xx instead */
+		if (proto != SC_PROTO_T0 &&
+				!(apdu->flags & SC_APDU_FLAGS_CASE4_SHORT_NO_LE))
 			*p = (u8)apdu->le;
 		break;
 	case SC_APDU_CASE_4_EXT:
@@ -549,6 +554,11 @@ int sc_transmit_apdu(sc_card_t *card, sc_apdu_t *apdu)
 	/* determine the APDU type if necessary, i.e. to use
 	 * short or extended APDUs  */
 	sc_detect_apdu_cse(card, apdu);
+	/* a card that rejects a short case 4 Le under T=1 wants such an APDU sent
+	 * without Le, as under T=0 (see SC_CARD_CAP_CASE4_SHORT_NO_LE) */
+	if ((card->caps & SC_CARD_CAP_CASE4_SHORT_NO_LE)
+			&& (apdu->cse & SC_APDU_SHORT_MASK) == SC_APDU_CASE_4_SHORT)
+		apdu->flags |= SC_APDU_FLAGS_CASE4_SHORT_NO_LE;
 	/* basic APDU consistency check */
 	r = sc_check_apdu(card, apdu);
 	if (r != SC_SUCCESS)

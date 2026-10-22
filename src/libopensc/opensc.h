@@ -572,6 +572,10 @@ struct sc_reader_operations {
 #define SC_CARD_CAP_WRAP_KEY			0x00000800
 /* Card (or card driver) supports key unwrapping operations */
 #define SC_CARD_CAP_UNWRAP_KEY			0x00001000
+/* Card rejects a short case 4 APDU that carries Le under T=1 (answers 67 00).
+ * Send such APDUs without Le, as under T=0, and let GET RESPONSE read the data.
+ * Lets a card with this quirk work over T=1 or contactless, where T=0 cannot be forced. */
+#define SC_CARD_CAP_CASE4_SHORT_NO_LE		0x00002000
 
 typedef struct sc_card {
 	struct sc_context *ctx;

@@ -314,6 +314,10 @@ typedef struct sc_file {
 #define SC_APDU_FLAGS_NO_SM		0x00000008UL
 /* let SM do the command chaining  */
 #define SC_APDU_FLAGS_SM_CHAINING	0x00000010UL
+/* encode a short case 4 APDU without the Le byte, as under T=0, whatever the
+ * protocol; the card answers 61xx and GET RESPONSE reads the data. Set from
+ * SC_CARD_CAP_CASE4_SHORT_NO_LE for cards that reject a case 4 Le under T=1. */
+#define SC_APDU_FLAGS_CASE4_SHORT_NO_LE	0x00000020UL
 
 #define SC_APDU_ALLOCATE_FLAG		0x01
 #define SC_APDU_ALLOCATE_FLAG_DATA	0x02

@@ -14,10 +14,10 @@ VALGRIND_FLAGS = --num-callers=30 -q --keep-debuginfo=yes --gen-suppressions=all
 TESTS_ENVIRONMENT = LD_PRELOAD='$(PCSCLITE_PATH)'
 endif
 
-noinst_PROGRAMS = asn1 simpletlv cachedir pkcs15filter openpgp-tool hextobin \
+noinst_PROGRAMS = asn1 simpletlv cachedir pkcs15filter openpgp-tool hextobin apdu \
 	decode_ecdsa_signature check_macro_reference_loop strip_pkcs1_2_padding \
 	base64 parse_pkcs11_uri
-TESTS = asn1 simpletlv cachedir pkcs15filter openpgp-tool hextobin \
+TESTS = asn1 simpletlv cachedir pkcs15filter openpgp-tool hextobin apdu \
 	decode_ecdsa_signature check_macro_reference_loop strip_pkcs1_2_padding \
 	base64 parse_pkcs11_uri
 
@@ -41,6 +41,7 @@ cachedir_SOURCES = cachedir.c
 pkcs15filter_SOURCES = pkcs15-emulator-filter.c
 openpgp_tool_SOURCES = openpgp-tool.c $(top_builddir)/src/tools/openpgp-tool-helpers.c
 hextobin_SOURCES = hextobin.c
+apdu_SOURCES = apdu.c
 decode_ecdsa_signature_SOURCES = decode_ecdsa_signature.c
 check_macro_reference_loop_SOURCES = check_macro_reference_loop.c
 strip_pkcs1_2_padding_SOURCES = strip_pkcs1_2_padding.c
